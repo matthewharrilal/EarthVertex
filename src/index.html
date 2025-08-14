@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="NEURAAL Interface - Earth Visualization">
+  <title>NEURAAL Interface</title>
+  
+  <!-- Font optimization -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="styles/style.css">
+</head>
+<body>
+  <!-- Main application container -->
+  <main class="app-container">
+    <!-- Globe visualization panel -->
+    <section class="globe-panel">
+      <div class="globe-container">
+        <canvas class="webgl" aria-label="Interactive Earth Globe"></canvas>
+      </div>
+      <div class="globe-label">A BAPHIRIS TAT</div>
+    </section>
+    
+    <!-- Chat and data interface panel -->
+    <aside class="chat-panel">
+      <!-- Command readiness section -->
+      <header class="chat-header">
+        <h1>READY FOR COMMANDS</h1>
+        <div class="chat-content">
+          <p>Ituned dolore lux primconduo sit quis faucibus nuis molus 2008 venenconlam sit tellus tellus sealum ipsum aurutmullus in tur dictu cursurabs.</p>
+          <p>Mauris placerat in nias ipsum seatine iaculis lorem quis so tellus iaculis cursuratum lorem placerat tellus tellus venen cursurante consecur in eget et lorem ipsum tellus.</p>
+          <p>Lorem diturit sit lorem tellus placerat niat tellus venenconlam sit tellus molestie ipsum aurutmullus in tur dictu cursurabs tellus lorem tellus placerat auctor amet lorem ipsum tellus.</p>
+        </div>
+      </header>
+      
+      <!-- Progress and metrics section -->
+      <div class="metrics-section">
+        <div class="progress-indicator">
+          <div class="progress-label">TERMINAL PROCESS PROGRESSION</div>
+          <div class="progress-value">002%</div>
+        </div>
+        
+        <div class="efficiency-metrics">
+          <div class="metrics-header">EFFICIENCY DONIA VARIABLE</div>
+          <div class="metrics-grid">
+            <div class="metric-row">
+              <span class="metric-label">Lat</span>
+              <span class="metric-value">sisitim sit bultamate liutuasse eiciladr</span>
+            </div>
+            <div class="metric-row">
+              <span class="metric-label">Long</span>
+              <span class="metric-value">plaucum consequat sit lincidunt</span>
+            </div>
+            <div class="metric-row">
+              <span class="metric-label">Diturit tellus</span>
+              <span class="metric-value">placerat sit cursurante</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Additional data section -->
+      <div class="data-section">
+        <p>Dituriua lorem sit lorem tellus amet tellus sit lorem auctor tellus dit cursurante lorem tellus cursurante cursurante tellus amet tellus placerat tellus lorem tellus auctor tellus...</p>
+        <p>Cursura tellus placerat tellus lorem tellus diturit lorem ipsum tellus cursurante tellus lorem tellus cursurante auctor tellus lorem tellus...</p>
+      </div>
+    </aside>
+  </main>
+  
+  <!-- Scripts at bottom for performance -->
+  <script type="module" src="core/script.js"></script>
+  <script type="module" src="interface/neuraalInterface.js"></script>
+  <script type="module" src="utils/test-runner.js"></script>
+</body>
+</html>

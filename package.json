@@ -1,0 +1,20 @@
+{
+  "name": "EarthVertex",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "NEURAAL Interface - Interactive 3D Earth Visualization",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^5.3.3",
+    "vite-plugin-restart": "^0.4.1",
+    "vite-plugin-glsl": "^1.3.0"
+  },
+  "dependencies": {
+    "three": "^0.167.1"
+  }
+}
