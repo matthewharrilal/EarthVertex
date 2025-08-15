@@ -184,27 +184,7 @@ class EnhancedTerrainCache {
  * Base setup with performance optimizations
  */
 // MODIFY CANVAS SELECTION FOR REFINED CATHEDRAL LAYOUT
-let canvas = null;
-
-// Wait for DOM to be ready
-const waitForCanvas = () => {
-  canvas = document.querySelector("canvas.webgl");
-  if (canvas) {
-    console.log('✅ Canvas found:', canvas);
-    console.log('📐 Canvas dimensions:', canvas.width, 'x', canvas.height);
-    console.log('📐 Canvas style dimensions:', canvas.style.width, 'x', canvas.style.height);
-    console.log('📐 Canvas offset dimensions:', canvas.offsetWidth, 'x', canvas.offsetHeight);
-    
-    // Check if canvas has proper dimensions
-    if (canvas.offsetWidth === 0 || canvas.offsetHeight === 0) {
-      console.warn('⚠️ Canvas has zero dimensions - this might cause rendering issues');
-    }
-    
-    return true;
-  }
-  console.log('⏳ Canvas not found, waiting...');
-  return false;
-};
+const canvas = document.querySelector("canvas.webgl");
 
 // MODIFY SCENE SETUP TO FIT LEFT ZONE (30% WIDTH)
 const camera = new THREE.PerspectiveCamera(
@@ -213,22 +193,18 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   1000
 );
-console.log('✅ Camera created with FOV:', camera.fov);
 
 // POSITION CAMERA FOR EXTREMELY ZOOMED OUT COSMIC VIEW
 camera.position.set(0, 0, 14); // Much further back to show maximum star field and cosmic context
-console.log('📷 Camera positioned at:', camera.position.toArray());
 
 // Scene
 const scene = new THREE.Scene();
-console.log('✅ Three.js scene created');
 
 // Sizes
 const sizes = {
   width: window.innerWidth,
   height: window.innerHeight,
 };
-console.log('📏 Window sizes:', sizes);
 
 // Performance systems
 const performanceMonitor = new PerformanceMonitor();
@@ -238,7 +214,6 @@ const terrainCache = new EnhancedTerrainCache();
 // Creating a group
 const group = new THREE.Group();
 scene.add(group);
-console.log('✅ Group created and added to scene');
 
 // OPTIMIZED: Bulge system variables with smoother performance
 let mouse = new THREE.Vector3(0, 0, 0);
@@ -263,60 +238,6 @@ let frameCount = 0;
 // Debug mode
 let debugMode = false;
 
-// MODIFY RENDERER SETUP FOR ENHANCED GLOBE
-let renderer = null;
-
-const setupRenderer = () => {
-  if (!canvas) {
-    console.error('❌ Cannot setup renderer: canvas not ready');
-    return false;
-  }
-  
-  console.log('🔧 Setting up renderer...');
-  console.log('📐 Canvas dimensions:', canvas.width, 'x', canvas.height);
-  
-  renderer = new THREE.WebGLRenderer({
-    canvas: canvas,
-    antialias: true,
-    alpha: true, // Transparent background
-    powerPreference: "high-performance"
-  });
-
-  // Set initial size for enhanced globe container - match CSS container size
-  const containerSize = 500; // Match --globe-size-desktop from CSS
-  renderer.setSize(containerSize, containerSize);
-  renderer.setClearColor(0x000000, 0); // Transparent
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  
-  console.log('✅ Renderer setup complete');
-  console.log('📐 Renderer size set to:', containerSize, 'x', containerSize);
-  console.log('🎨 Clear color set to transparent');
-  return true;
-};
-
-/**
- * OPTIMIZED: Controls with performance tuning
- */
-let controls = null;
-
-const setupControls = () => {
-  if (!canvas || !camera) {
-    console.error('❌ Cannot setup controls: canvas or camera not ready');
-    return false;
-  }
-  
-  controls = new OrbitControls(camera, canvas);
-  controls.enableDamping = true;
-  controls.dampingFactor = 0.05;
-  controls.enablePan = false;
-  controls.enableZoom = true;
-  controls.zoomSpeed = 0.8; // Slightly slower for smoother feel
-  controls.rotateSpeed = 0.8;
-  
-  console.log('✅ Controls setup complete');
-  return true;
-};
-
 /**
  * Camera and textures
  */
@@ -331,14 +252,10 @@ const loadTextures = () => {
     const totalTextures = 4;
     let hasError = false;
     
-    console.log('🔍 Starting texture loading...');
-    
     const checkAllLoaded = () => {
       loadedCount++;
-      console.log(`📦 Texture loaded: ${loadedCount}/${totalTextures}`);
       if (loadedCount === totalTextures && !hasError) {
         console.log('✅ All textures loaded successfully');
-        console.log('📊 Loaded textures:', Object.keys(textures));
         
         // OPTIMIZATION: Set texture parameters for better performance
         Object.values(textures).forEach(texture => {
@@ -359,21 +276,13 @@ const loadTextures = () => {
       if (!hasError) {
         hasError = true;
         console.error('❌ Texture loading error:', error);
-        console.error('🔍 Failed texture URL:', error.target?.src || 'unknown');
         reject(error);
       }
     };
     
-    console.log('🔄 Loading star texture: /circle.png');
     textures.starTexture = textureLoader.load("/circle.png", checkAllLoaded, undefined, handleError);
-    
-    console.log('🔄 Loading color map: /earthmap1k.jpg');
     textures.colorMap = textureLoader.load("/earthmap1k.jpg", checkAllLoaded, undefined, handleError);
-    
-    console.log('🔄 Loading elevation map: /earthbump1k.jpg');
     textures.elevationMap = textureLoader.load("/earthbump1k.jpg", checkAllLoaded, undefined, handleError);
-    
-    console.log('🔄 Loading alpha map: /earthspec1k.jpg');
     textures.alphaMap = textureLoader.load("/earthspec1k.jpg", checkAllLoaded, undefined, handleError);
   });
 };
@@ -490,145 +399,74 @@ function setupHoverTracking() {
 // Initialize the application
 const init = async () => {
   try {
-    console.log('🚀 Starting initialization...');
-    
-    // Wait for canvas to be ready
-console.log('🔍 Waiting for canvas to be ready...');
-let canvasWaitCount = 0;
-while (!waitForCanvas()) {
-  canvasWaitCount++;
-  console.log(`⏳ Canvas wait attempt ${canvasWaitCount}...`);
-  await new Promise(resolve => setTimeout(resolve, 100));
-  
-  // Prevent infinite loop
-  if (canvasWaitCount > 50) { // 5 seconds max
-    console.error('❌ Canvas wait timeout - canvas not found after 5 seconds');
-    throw new Error('Canvas not found');
-  }
-}
-console.log('✅ Canvas is ready!');
-    
-    // Setup renderer
-    if (!setupRenderer()) {
-      throw new Error('Failed to setup renderer');
-    }
-    
-    // Setup controls
-    if (!setupControls()) {
-      throw new Error('Failed to setup controls');
-    }
-    
     // Load textures and create scene
-    console.log('📦 Loading textures...');
     const textures = await loadTextures();
-    console.log('✅ Textures loaded successfully:', Object.keys(textures));
     window.textures = textures;
-    console.log('🌍 Creating Earth mesh...');
     createEarthMesh();
-    console.log('🌍 Earth mesh created, checking if it was added to scene...');
-    console.log('🌍 Earth mesh exists:', !!earthMesh);
-    console.log('🌍 Earth mesh in group:', !!earthMesh && group.children.includes(earthMesh));
-    console.log('🌍 Group children count:', group.children.length);
     console.log('🚀 Enhanced Earth visualization system initialized');
-    
-    // Start animation loop
-    console.log('🎬 Starting animation loop...');
-    animate(0);
   } catch (error) {
     console.error('❌ Initialization error:', error);
-    console.error('🔍 Error details:', error.message);
-    console.error('🔍 Error stack:', error.stack);
     // Fallback to basic rendering
-    console.log('⚠️ Falling back to basic Earth mesh...');
     createBasicEarthMesh();
   }
 };
 
-// Start the application when DOM is ready
-console.log('🚀 Script loading...');
-console.log('📋 Document ready state:', document.readyState);
-
-if (document.readyState === 'loading') {
-  console.log('⏳ DOM still loading, waiting for DOMContentLoaded...');
-  document.addEventListener('DOMContentLoaded', () => {
-    console.log('✅ DOMContentLoaded fired, starting init...');
-    init();
-  });
-} else {
-  console.log('✅ DOM already ready, starting init immediately...');
-  init();
-}
+// Start the application
+init();
 
 /**
  * ENHANCED: Advanced Earth mesh creation with LOD support and terrain density
  */
 function createEarthMesh() {
-  console.log('🔧 Starting createEarthMesh...');
   // Start with initial geometry
   let pointsGeometry = lodManager.createGeometry();
-  console.log('📐 Geometry created with', pointsGeometry.attributes.position.count, 'vertices');
   
   // ENHANCED: Advanced shader material with terrain density controls
-  console.log('🔧 Creating enhanced shader material...');
-  console.log('📝 Vertex shader:', typeof enhancedVertexShader);
-  console.log('📝 Fragment shader:', typeof enhancedFragmentShader);
-  
-  let pointsMaterial;
-  try {
-    pointsMaterial = new THREE.ShaderMaterial({
-      transparent: true,
-      uniforms: {
-        // Existing uniforms
-        uTime: { value: 0.0 },
-        uSize: { value: 1.2 }, // Slightly larger points for better visibility
-        uElevationMap: { value: window.textures.elevationMap },
-        uColorMap: { value: window.textures.colorMap },
-        uAlphaMap: { value: window.textures.alphaMap },
-        uMouse: { value: new THREE.Vector3(0, 0, 0) },
-        uBulgeStrength: { value: 0.0 },
-        uBulgeRadius: { value: bulgeRadius },
-        uBulgeIntensity: { value: bulgeIntensity },
-        uWaterEffect: { value: 0.3 },
-        
-        // Enhanced terrain controls
-        uTerrainDiversity: { value: 1.0 }, // MAXIMUM for dramatic effects
-        uTerrainAnimation: { value: 1.0 },
-        uSnowLine: { value: 0.7 }, // Lower snow line for more dramatic snow coverage
-        uOceanDepth: { value: 1.0 }, // Maximum ocean effects
-        uForestDensity: { value: 1.0 }, // Maximum forest density
-        uDesertDunes: { value: 1.0 }, // Maximum desert dune effects
-        uMountainSharpness: { value: 1.0 }, // Maximum mountain sharpness
-        
-        // Enhanced terrain density controls
-        uDetailLevel: { value: 1.0 }, // Full detail by default
-        uTerrainDensity: { value: 1.5 }, // Increased for dramatic effect
-        
-        // Lighting and brightness controls
-        uAmbientLight: { value: 0.7 }, // Increased base brightness
-        uDirectionalLight: { value: 1.0 }, // Maximum directional lighting
-        uContrast: { value: 1.4 }, // Increased contrast for dramatic effect
-        uBrightness: { value: 1.5 }, // Increased brightness for maximum visibility
-        uSaturation: { value: 1.3 }, // Increased saturation for vibrant colors
-        
-        // Performance controls
-        uLODLevel: { value: 1.0 }, // LOD quality multiplier
-        uSimplifyTerrain: { value: 0.0 } // Terrain simplification factor
-      },
-      vertexShader: enhancedVertexShader,
-      fragmentShader: enhancedFragmentShader
-    });
-    
-    console.log('✅ Enhanced shader material created successfully');
-  } catch (error) {
-    console.error('❌ Failed to create enhanced shader material:', error);
-    throw error;
-  }
+  const pointsMaterial = new THREE.ShaderMaterial({
+    transparent: true,
+    uniforms: {
+      // Existing uniforms
+      uTime: { value: 0.0 },
+      uSize: { value: 1.2 }, // Slightly larger points for better visibility
+      uElevationMap: { value: window.textures.elevationMap },
+      uColorMap: { value: window.textures.colorMap },
+      uAlphaMap: { value: window.textures.alphaMap },
+      uMouse: { value: new THREE.Vector3(0, 0, 0) },
+      uBulgeStrength: { value: 0.0 },
+      uBulgeRadius: { value: bulgeRadius },
+      uBulgeIntensity: { value: bulgeIntensity },
+      uWaterEffect: { value: 0.3 },
+      
+      // Enhanced terrain controls
+      uTerrainDiversity: { value: 1.0 }, // MAXIMUM for dramatic effects
+      uTerrainAnimation: { value: 1.0 },
+      uSnowLine: { value: 0.7 }, // Lower snow line for more dramatic snow coverage
+      uOceanDepth: { value: 1.0 }, // Maximum ocean effects
+      uForestDensity: { value: 1.0 }, // Maximum forest density
+      uDesertDunes: { value: 1.0 }, // Maximum desert dune effects
+      uMountainSharpness: { value: 1.0 }, // Maximum mountain sharpness
+      
+      // Enhanced terrain density controls
+      uDetailLevel: { value: 1.0 }, // Full detail by default
+      uTerrainDensity: { value: 1.5 }, // Increased for dramatic effect
+      
+      // Lighting and brightness controls
+      uAmbientLight: { value: 0.7 }, // Increased base brightness
+      uDirectionalLight: { value: 1.0 }, // Maximum directional lighting
+      uContrast: { value: 1.4 }, // Increased contrast for dramatic effect
+      uBrightness: { value: 1.5 }, // Increased brightness for maximum visibility
+      uSaturation: { value: 1.3 }, // Increased saturation for vibrant colors
+      
+      // Performance controls
+      uLODLevel: { value: 1.0 }, // LOD quality multiplier
+      uSimplifyTerrain: { value: 0.0 } // Terrain simplification factor
+    },
+    vertexShader: enhancedVertexShader,
+    fragmentShader: enhancedFragmentShader
+  });
   
   earthMesh = new THREE.Points(pointsGeometry, pointsMaterial);
   group.add(earthMesh);
-  console.log('🌍 Earth mesh added to group, group now has', group.children.length, 'children');
-  console.log('🌍 Earth mesh position:', earthMesh.position.toArray());
-  console.log('🌍 Earth mesh visible:', earthMesh.visible);
 
   // Setup systems
   setupHoverTracking();
@@ -661,26 +499,50 @@ function createBasicEarthMesh() {
   
   earthMesh = new THREE.Points(pointsGeometry, basicMaterial);
   group.add(earthMesh);
-  console.log('🌍 Basic Earth mesh added to group, group now has', group.children.length, 'children');
-  console.log('🌍 Basic Earth mesh position:', earthMesh.position.toArray());
-  console.log('🌍 Basic Earth mesh visible:', earthMesh.visible);
   
   console.log('⚠️ Basic Earth mesh created (fallback mode)');
 }
 
+/**
+ * OPTIMIZED: Enhanced animation and controls
+ */
+// MODIFY RENDERER SETUP FOR ENHANCED GLOBE
+const renderer = new THREE.WebGLRenderer({
+  canvas: canvas,
+  antialias: true,
+  alpha: true, // Transparent background
+  powerPreference: "high-performance"
+});
+
+// Set initial size for enhanced globe container
+renderer.setSize(400, 400); // Larger initial size
+renderer.setClearColor(0x000000, 0); // Transparent
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
 // REFINED CATHEDRAL RESIZE HANDLER - Globe uses full container size
 window.addEventListener("resize", () => {
   // Globe now uses full container dimensions
-  const container = document.querySelector(".globe-container");
-  if (container && renderer && camera) {
+  const container = document.querySelector(".earth-globe-container");
+  if (container) {
     const containerRect = container.getBoundingClientRect();
     renderer.setSize(containerRect.width, containerRect.height);
     camera.aspect = containerRect.width / containerRect.height;
-    camera.updateProjectionMatrix();
+  camera.updateProjectionMatrix();
 
     console.log('REFINED_CATHEDRAL_LAYOUT: Globe updated to', containerRect.width, 'x', containerRect.height);
   }
 });
+
+/**
+ * OPTIMIZED: Controls with performance tuning
+ */
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
+controls.dampingFactor = 0.05;
+controls.enablePan = false;
+controls.enableZoom = true;
+controls.zoomSpeed = 0.8; // Slightly slower for smoother feel
+controls.rotateSpeed = 0.8;
 
 // OPTIMIZED: Animation loop with LOD and performance monitoring
 const animate = (currentTime) => {
@@ -689,12 +551,6 @@ const animate = (currentTime) => {
   
   // Performance monitoring
   performanceMonitor.update();
-  
-  // Debug: Check if we have the necessary components
-  if (!renderer || !scene || !camera) {
-    console.error('❌ Missing renderer, scene, or camera in animate loop');
-    return;
-  }
   
   // LOD system update
   lodManager.update(camera, group.position);
@@ -737,11 +593,11 @@ const animate = (currentTime) => {
   
   controls.update();
   renderer.render(scene, camera);
-  console.log('🎬 Frame rendered, scene children:', scene.children.length, 'group children:', group.children.length);
   window.requestAnimationFrame(animate);
 };
 
-// Animation will be started after initialization is complete
+// Start optimized animation
+animate(0);
 
 /**
  * ENHANCED: Simplified controls with enhanced terrain features
@@ -939,23 +795,24 @@ setTimeout(() => {
 // ENHANCED GLOBE SETUP FUNCTION
 function setupEnhancedGlobe() {
   // Update camera for extremely zoomed out cosmic view
-  if (camera) {
-    camera.fov = 65; // Even wider FOV for maximum cosmic view
-    camera.position.set(0, 0, 14); // Much further back to show maximum star field
-    camera.updateProjectionMatrix();
+  if (window.camera) {
+    window.camera.fov = 65; // Even wider FOV for maximum cosmic view
+    window.camera.position.set(0, 0, 14); // Much further back to show maximum star field
+    window.camera.updateProjectionMatrix();
   }
   
   // Enhanced globe material for larger scale
-  if (earthMesh && earthMesh.material && earthMesh.material.uniforms) {
-    earthMesh.material.uniforms.uSize.value = 1.5; // Larger points for bigger globe
-    earthMesh.material.uniforms.uDetailLevel.value = 1.0; // Maximum detail for larger view
+  if (window.pointsMaterial) {
+    window.pointsMaterial.uniforms.uSize.value = 1.5; // Larger points for bigger globe
+    window.pointsMaterial.uniforms.uGlobalScale = { value: 1.2 }; // Overall scale multiplier
+    window.pointsMaterial.uniforms.uDetailLevel = { value: 1.0 }; // Maximum detail for larger view
   }
   
   // Larger geometry for more detail
-  if (earthMesh && earthMesh.geometry) {
+  if (window.earthMesh && window.earthMesh.geometry) {
     const newGeometry = new THREE.SphereGeometry(2.75, 400, 400); // Higher resolution
-    earthMesh.geometry.dispose();
-    earthMesh.geometry = newGeometry;
+    window.earthMesh.geometry.dispose();
+    window.earthMesh.geometry = newGeometry;
   }
   
   console.log('🌍 ENHANCED GLOBE SETUP COMPLETE - Larger scale with no constraints');
@@ -967,13 +824,13 @@ function updateGlobeSize() {
   const rect = container.getBoundingClientRect();
   const size = Math.min(rect.width, rect.height);
   
-  if (renderer) {
-    renderer.setSize(size, size);
+  if (window.renderer) {
+    window.renderer.setSize(size, size);
   }
   
-  if (camera) {
-    camera.aspect = 1;
-    camera.updateProjectionMatrix();
+  if (window.camera) {
+    window.camera.aspect = 1;
+    window.camera.updateProjectionMatrix();
   }
 }
 
@@ -987,23 +844,27 @@ function setupEnlargedGlobe() {
   const container = document.querySelector('.earth-globe-container');
   if (container) {
     const rect = container.getBoundingClientRect();
-    if (renderer) {
-      renderer.setSize(rect.width, rect.height);
-      renderer.setClearColor(0x000000, 0); // Transparent for overlays
+    if (window.renderer) {
+      window.renderer.setSize(rect.width, rect.height);
+      window.renderer.setClearColor(0x000000, 0); // Transparent for overlays
     }
   }
   
   // Enhanced globe material for zoomed out cosmic view
-  if (earthMesh && earthMesh.material && earthMesh.material.uniforms) {
-    earthMesh.material.uniforms.uSize.value = 1.5; // Larger points for zoomed out view
-    earthMesh.material.uniforms.uDetailLevel.value = 1.0; // Maximum detail for larger view
+  if (window.pointsMaterial) {
+    window.pointsMaterial.uniforms.uSize.value = 1.5; // Larger points for zoomed out view
+    if (window.pointsMaterial.uniforms.uGlobalScale) {
+      window.pointsMaterial.uniforms.uGlobalScale.value = 1.2; // Larger overall scale for better visibility
+    }
+    window.pointsMaterial.uniforms.uWireframeMode = { value: 1.0 }; // Full wireframe aesthetic
+    window.pointsMaterial.uniforms.uGlowIntensity = { value: 0.9 }; // Enhanced glow for cosmic visibility
   }
   
   // High-resolution geometry for enlarged display
-  if (earthMesh && earthMesh.geometry) {
+  if (window.earthMesh && window.earthMesh.geometry) {
     const newGeometry = new THREE.SphereGeometry(2.5, 400, 400); // Higher resolution for larger display
-    earthMesh.geometry.dispose();
-    earthMesh.geometry = newGeometry;
+    window.earthMesh.geometry.dispose();
+    window.earthMesh.geometry = newGeometry;
   }
   
   console.log('🌍 ENLARGED GLOBE SETUP COMPLETE - 500px container with enhanced materials');
@@ -1022,33 +883,33 @@ function updateEnlargedGlobeSize() {
 
 // 6. ENHANCED CONTROLS FOR EXTREMELY ZOOMED OUT GLOBE
 function setupEnlargedGlobeControls() {
-  if (camera) {
+  if (window.camera) {
     // Zoom out camera extremely to show maximum stars and cosmic context
-    camera.position.set(0, 0, 14); // Much further back to show maximum star field
-    camera.fov = 65; // Maximum field of view for cosmic immersion
-    camera.updateProjectionMatrix();
+    window.camera.position.set(0, 0, 14); // Much further back to show maximum star field
+    window.camera.fov = 65; // Maximum field of view for cosmic immersion
+    window.camera.updateProjectionMatrix();
     console.log('📷 Camera extremely zoomed out for maximum cosmic view with enhanced star field');
   }
   
-  if (controls) {
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.03; // Smoother rotation
-    controls.enablePan = false;
-    controls.enableZoom = true;
-    controls.zoomSpeed = 0.5;
-    controls.rotateSpeed = 0.6;
-    controls.autoRotate = true; // Auto-rotation for dynamic effect
-    controls.autoRotateSpeed = 0.3;
+  if (window.controls) {
+    window.controls.enableDamping = true;
+    window.controls.dampingFactor = 0.03; // Smoother rotation
+    window.controls.enablePan = false;
+    window.controls.enableZoom = true;
+    window.controls.zoomSpeed = 0.5;
+    window.controls.rotateSpeed = 0.6;
+    window.controls.autoRotate = true; // Auto-rotation for dynamic effect
+    window.controls.autoRotateSpeed = 0.3;
   }
 }
 
 // 7. CAMERA RESET FOR EXTREME COSMIC VIEW
 function resetCameraForCosmicView() {
-  if (camera) {
+  if (window.camera) {
     // Ensure camera is positioned for maximum cosmic view
-    camera.position.set(0, 0, 14);
-    camera.fov = 65;
-    camera.updateProjectionMatrix();
+    window.camera.position.set(0, 0, 14);
+    window.camera.fov = 65;
+    window.camera.updateProjectionMatrix();
     console.log('🌌 Camera reset for maximum cosmic view with enhanced star field');
   }
 }
